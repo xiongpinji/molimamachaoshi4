@@ -17,24 +17,14 @@
  * under the License.
  */
 
-package com.alibaba.himarket.support.product;
+package com.alibaba.himarket.support.enums;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+public enum ProductOrderStatus {
+    PENDING_PAYMENT,
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProductFeature {
+    PAID,
 
-    private ModelFeature modelFeature;
+    FAILED,
 
-    private CommerceConfig commerceConfig;
-
-    private SkillConfig skillConfig;
-
-    private WorkerConfig workerConfig;
+    CANCELLED,
 }

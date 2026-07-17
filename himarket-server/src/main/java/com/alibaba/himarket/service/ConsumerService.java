@@ -152,6 +152,15 @@ public interface ConsumerService {
     SubscriptionResult approveSubscription(String consumerId, String subscriptionId);
 
     /**
+     * Activates a purchased product by creating or approving the consumer's subscription.
+     *
+     * @param consumerId consumer ID
+     * @param productId purchased product ID
+     * @return activated subscription information
+     */
+    SubscriptionResult activatePurchasedProduct(String consumerId, String productId);
+
+    /**
      * Get default credential authentication info for developer Returns empty maps if consumer or
      * credential not found
      *

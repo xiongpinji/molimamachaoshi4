@@ -17,8 +17,15 @@
  * under the License.
  */
 
-package com.alibaba.himarket.support.product;
+package com.alibaba.himarket.dto.result.order;
 
+import com.alibaba.himarket.dto.converter.OutputConverter;
+import com.alibaba.himarket.entity.ProductOrder;
+import com.alibaba.himarket.support.enums.ProductOrderStatus;
+import com.alibaba.himarket.support.product.CommercePricingMode;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,13 +35,33 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductFeature {
+public class ProductOrderResult implements OutputConverter<ProductOrderResult, ProductOrder> {
 
-    private ModelFeature modelFeature;
+    private String orderId;
 
-    private CommerceConfig commerceConfig;
+    private String productId;
 
-    private SkillConfig skillConfig;
+    private String consumerId;
 
-    private WorkerConfig workerConfig;
+    private String developerId;
+
+    private String portalId;
+
+    private String productName;
+
+    private BigDecimal amount;
+
+    private String currency;
+
+    private CommercePricingMode pricingMode;
+
+    private ProductOrderStatus status;
+
+    private List<PaymentRecordResult> paymentRecords;
+
+    private LocalDateTime paidAt;
+
+    private LocalDateTime createAt;
+
+    private LocalDateTime updatedAt;
 }

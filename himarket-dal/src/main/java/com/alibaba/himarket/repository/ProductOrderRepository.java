@@ -17,24 +17,21 @@
  * under the License.
  */
 
-package com.alibaba.himarket.support.product;
+package com.alibaba.himarket.repository;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.alibaba.himarket.entity.ProductOrder;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProductFeature {
+public interface ProductOrderRepository extends BaseRepository<ProductOrder, Long> {
 
-    private ModelFeature modelFeature;
+    Optional<ProductOrder> findByOrderId(String orderId);
 
-    private CommerceConfig commerceConfig;
+    Optional<ProductOrder> findFirstByConsumerIdAndProductIdAndStatusInOrderByCreateAtDesc(
+            String consumerId,
+            String productId,
+            java.util.Collection<com.alibaba.himarket.support.enums.ProductOrderStatus> statuses);
 
-    private SkillConfig skillConfig;
-
-    private WorkerConfig workerConfig;
+    Page<ProductOrder> findByConsumerId(String consumerId, Pageable pageable);
 }

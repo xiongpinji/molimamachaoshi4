@@ -17,8 +17,9 @@
  * under the License.
  */
 
-package com.alibaba.himarket.support.product;
+package com.alibaba.himarket.dto.params.order;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,13 +29,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductFeature {
+public class CreateProductOrderParam {
 
-    private ModelFeature modelFeature;
-
-    private CommerceConfig commerceConfig;
-
-    private SkillConfig skillConfig;
-
-    private WorkerConfig workerConfig;
+    @NotBlank(message = "Product ID cannot be empty")
+    private String productId;
 }

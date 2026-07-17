@@ -9,9 +9,17 @@ import com.alibaba.himarket.dto.params.coding.CreateCodingSessionParam;
 import com.alibaba.himarket.dto.params.coding.UpdateCodingSessionParam;
 import com.alibaba.himarket.dto.result.coding.CodingSessionResult;
 import com.alibaba.himarket.dto.result.common.PageResult;
+import com.alibaba.himarket.dto.result.consumer.ConsumerResult;
+import com.alibaba.himarket.dto.result.product.ProductResult;
+import com.alibaba.himarket.dto.result.product.SubscriptionResult;
 import com.alibaba.himarket.entity.CodingSession;
 import com.alibaba.himarket.repository.CodingSessionRepository;
 import com.alibaba.himarket.service.CodingSessionService;
+import com.alibaba.himarket.service.ConsumerService;
+import com.alibaba.himarket.service.ProductService;
+import com.alibaba.himarket.support.enums.SubscriptionStatus;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,11 +36,14 @@ public class CodingSessionServiceImpl implements CodingSessionService {
 
     private final CodingSessionRepository sessionRepository;
     private final ContextHolder contextHolder;
+    private final ConsumerService consumerService;
+    private final ProductService productService;
 
     private static final int MAX_SESSIONS_PER_USER = 50;
 
     @Override
     public CodingSessionResult createSession(CreateCodingSessionParam param) {
+        validateApprovedModel(param.getModelProductId());
         String sessionId = IdGenerator.genSessionId();
         CodingSession session = param.convertTo();
         session.setUserId(contextHolder.getUser());
@@ -77,6 +88,31 @@ public class CodingSessionServiceImpl implements CodingSessionService {
                         () ->
                                 new BusinessException(
                                         ErrorCode.NOT_FOUND, Resources.CHAT_SESSION, sessionId));
+    }
+
+    private void validateApprovedModel(String modelProductId) {
+        if (modelProductId == null || modelProductId.isBlank()) {
+            return;
+        }
+
+        ProductResult modelProduct = productService.getProduct(modelProductId);
+        if (Boolean.FALSE.equals(modelProduct.getSubscribable())) {
+            return;
+        }
+
+        ConsumerResult primaryConsumer =
+                consumerService.getPrimaryConsumer(contextHolder.getUser());
+        Set<String> approvedProductIds =
+                consumerService.listConsumerSubscriptions(primaryConsumer.getConsumerId()).stream()
+                        .filter(s -> SubscriptionStatus.APPROVED.name().equals(s.getStatus()))
+                        .map(SubscriptionResult::getProductId)
+                        .collect(Collectors.toSet());
+        if (!approvedProductIds.contains(modelProductId)) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_REQUEST,
+                    "Model product `%s` is not approved for this consumer"
+                            .formatted(modelProductId));
+        }
     }
 
     private void cleanupExtraSessions() {

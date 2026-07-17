@@ -19,6 +19,7 @@
 
 package com.alibaba.himarket.support.product;
 
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,13 +29,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductFeature {
+public class CommerceConfig {
 
-    private ModelFeature modelFeature;
+    private Boolean enabled;
 
-    private CommerceConfig commerceConfig;
+    private CommercePricingMode pricingMode;
 
-    private SkillConfig skillConfig;
+    private BigDecimal amount;
 
-    private WorkerConfig workerConfig;
+    private String currency;
+
+    private String displayLabel;
 }

@@ -31,20 +31,27 @@ import com.alibaba.himarket.dto.result.chat.ChatSessionResult;
 import com.alibaba.himarket.dto.result.chat.ConversationResult_V1;
 import com.alibaba.himarket.dto.result.chat.ProductConversationResult;
 import com.alibaba.himarket.dto.result.common.PageResult;
+import com.alibaba.himarket.dto.result.consumer.ConsumerResult;
+import com.alibaba.himarket.dto.result.product.ProductResult;
+import com.alibaba.himarket.dto.result.product.SubscriptionResult;
 import com.alibaba.himarket.entity.Chat;
 import com.alibaba.himarket.entity.ChatSession;
 import com.alibaba.himarket.repository.ChatRepository;
 import com.alibaba.himarket.repository.ChatSessionRepository;
 import com.alibaba.himarket.service.ChatSessionService;
+import com.alibaba.himarket.service.ConsumerService;
 import com.alibaba.himarket.service.ProductService;
 import com.alibaba.himarket.support.chat.attachment.ChatAttachmentConfig;
+import com.alibaba.himarket.support.enums.SubscriptionStatus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -69,6 +76,8 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 
     private final ContextHolder contextHolder;
 
+    private final ConsumerService consumerService;
+
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -80,8 +89,7 @@ public class ChatSessionServiceImpl implements ChatSessionService {
     public ChatSessionResult createSession(CreateChatSessionParam param) {
         // Check products exist
         productService.existsProducts(param.getProducts());
-
-        // TODO: Check whether the user has subscribed to the product.
+        validateApprovedProducts(param.getProducts());
 
         String sessionId = IdGenerator.genSessionId();
         ChatSession session = param.convertTo();
@@ -108,6 +116,39 @@ public class ChatSessionServiceImpl implements ChatSessionService {
                         () ->
                                 new BusinessException(
                                         ErrorCode.NOT_FOUND, Resources.CHAT_SESSION, sessionId));
+    }
+
+    private void validateApprovedProducts(List<String> productIds) {
+        List<String> gatedProductIds =
+                productIds.stream()
+                        .filter(
+                                productId -> {
+                                    ProductResult product = productService.getProduct(productId);
+                                    return !Boolean.FALSE.equals(product.getSubscribable());
+                                })
+                        .toList();
+        if (gatedProductIds.isEmpty()) {
+            return;
+        }
+
+        ConsumerResult primaryConsumer =
+                consumerService.getPrimaryConsumer(contextHolder.getUser());
+        Set<String> approvedProductIds =
+                consumerService.listConsumerSubscriptions(primaryConsumer.getConsumerId()).stream()
+                        .filter(s -> SubscriptionStatus.APPROVED.name().equals(s.getStatus()))
+                        .map(SubscriptionResult::getProductId)
+                        .collect(Collectors.toSet());
+
+        List<String> unauthorizedProducts =
+                gatedProductIds.stream()
+                        .filter(productId -> !approvedProductIds.contains(productId))
+                        .toList();
+        if (!unauthorizedProducts.isEmpty()) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_REQUEST,
+                    "Products `%s` are not approved for this consumer"
+                            .formatted(String.join(", ", unauthorizedProducts)));
+        }
     }
 
     private ChatSession findSession(String sessionId) {

@@ -19,22 +19,8 @@
 
 package com.alibaba.himarket.support.product;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+public enum CommercePricingMode {
+    ONE_TIME,
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProductFeature {
-
-    private ModelFeature modelFeature;
-
-    private CommerceConfig commerceConfig;
-
-    private SkillConfig skillConfig;
-
-    private WorkerConfig workerConfig;
+    PERIODIC,
 }

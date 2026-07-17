@@ -17,24 +17,19 @@
  * under the License.
  */
 
-package com.alibaba.himarket.support.product;
+package com.alibaba.himarket.dto.params.order;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.alibaba.himarket.support.enums.ProductOrderStatus;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProductFeature {
+public class QueryProductOrderParam {
 
-    private ModelFeature modelFeature;
+    private ProductOrderStatus status;
 
-    private CommerceConfig commerceConfig;
+    private String productName;
 
-    private SkillConfig skillConfig;
+    private String productId;
 
-    private WorkerConfig workerConfig;
+    private Boolean activeOnly;
 }
