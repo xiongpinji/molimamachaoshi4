@@ -60,6 +60,7 @@
     },
     "loginCta": "登录后开始对话",
     "startCta": "开始对话",
+    "purchaseCta": "购买并开始对话",
     "subscribeCta": "订阅并开始对话"
   },
   "curl": {

@@ -8,7 +8,7 @@ import { DetailSkeleton } from './loading';
 import { ProductHeader } from './ProductHeader';
 
 import type { ProductHeaderHandle } from './ProductHeader';
-import type { IProductIcon, IMCPConfig, IAgentConfig } from '../lib/apis/typing';
+import type { ICommerceConfig, IProductIcon, IMCPConfig, IAgentConfig } from '../lib/apis/typing';
 import type { ReactNode, Ref } from 'react';
 
 export interface ProductDetailHeaderProps {
@@ -18,6 +18,7 @@ export interface ProductDetailHeaderProps {
   defaultIcon?: string;
   mcpConfig?: IMCPConfig;
   agentConfig?: IAgentConfig;
+  commerceConfig?: ICommerceConfig;
   updatedAt?: string;
   productType?: 'REST_API' | 'MCP_SERVER' | 'AGENT_API' | 'MODEL_API' | 'AGENT_SKILL';
   subscribable?: boolean;

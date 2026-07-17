@@ -24,6 +24,8 @@
   "modelMarketTitle": "Model 市场",
   "imageGeneration": "图像",
   "multiModal": "多模态",
+  "oneTimePrice": "{{price}} 一次性",
+  "periodicPrice": "{{price}} / 周期",
   "noDescription": "暂无描述，可进入产品详情查看用法示例和配置说明。",
   "openAiCompatible": "兼容 OpenAI",
   "restEndpoint": "REST 端点",

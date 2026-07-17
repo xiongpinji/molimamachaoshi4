@@ -3,6 +3,16 @@ export interface IProductIcon {
   value: string;
 }
 
+export type ICommercePricingMode = 'ONE_TIME' | 'PERIODIC';
+
+export interface ICommerceConfig {
+  enabled?: boolean;
+  pricingMode?: ICommercePricingMode;
+  amount?: number;
+  currency?: string;
+  displayLabel?: string;
+}
+
 export interface IAgentConfig {
   agentAPIConfig: {
     agentProtocols: string[];

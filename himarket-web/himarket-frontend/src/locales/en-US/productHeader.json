@@ -12,10 +12,36 @@
   "subscribe": {
     "loginRequired": "Log in to subscribe",
     "subscribed": "Subscribed",
+    "pending": "Subscription pending",
     "notSubscribed": "Not subscribed",
     "manage": "Manage subscription",
     "openAccess": "Open access, no subscription required",
     "action": "Subscribe"
+  },
+  "purchase": {
+    "loginRequired": "Log in to purchase",
+    "available": "Available to purchase",
+    "pending": "Purchase pending",
+    "active": "Activated",
+    "action": "Buy now",
+    "continuePayment": "Continue payment",
+    "activationProcessing": "Activation in progress",
+    "viewOrder": "View order",
+    "existingOrder": "An active order was found and opened for you",
+    "manage": "Manage purchase",
+    "primaryConsumerRequired": "Create or select a primary consumer first",
+    "success": "Purchase and activation completed",
+    "failed": "Purchase failed. Please try again."
+  },
+  "commerce": {
+    "priceTitle": "Price",
+    "displayLabelFallback": "Curated by platform",
+    "oneTimePrice": "{{price}} one-time",
+    "periodicPrice": "{{price}} / period",
+    "pricingMode": {
+      "ONE_TIME": "One-time payment",
+      "PERIODIC": "Recurring payment"
+    }
   },
   "modal": {
     "title": "Subscription Management",

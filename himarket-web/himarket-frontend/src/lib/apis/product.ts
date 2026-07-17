@@ -7,6 +7,7 @@ import request, { type RespI } from '../request';
 import type {
   IAgentConfig,
   IAPIConfig,
+  ICommerceConfig,
   IInputSchema,
   IMCPConfig,
   IModelConfig,
@@ -47,11 +48,12 @@ export interface IProductDetail {
   enabled: boolean;
   subscribable?: boolean;
   feature?: {
-    modelFeature: {
+    modelFeature?: {
       model: string;
       webSearch: boolean;
       enableMultiModal: boolean;
     };
+    commerceConfig?: ICommerceConfig;
   };
 }
 

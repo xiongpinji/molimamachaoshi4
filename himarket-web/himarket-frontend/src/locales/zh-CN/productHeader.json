@@ -12,10 +12,36 @@
   "subscribe": {
     "loginRequired": "登录后订阅",
     "subscribed": "已订阅",
+    "pending": "订阅审核中",
     "notSubscribed": "未订阅",
     "manage": "管理订阅",
     "openAccess": "无需订阅，开放访问",
     "action": "订阅"
+  },
+  "purchase": {
+    "loginRequired": "登录后购买",
+    "available": "可购买",
+    "pending": "购买处理中",
+    "active": "已开通",
+    "action": "立即购买",
+    "continuePayment": "继续支付",
+    "activationProcessing": "开通处理中",
+    "viewOrder": "查看订单",
+    "existingOrder": "检测到未完成订单，已为你跳转",
+    "manage": "管理购买",
+    "primaryConsumerRequired": "请先创建或设置默认消费者",
+    "success": "购买并开通成功",
+    "failed": "购买失败，请重试"
+  },
+  "commerce": {
+    "priceTitle": "价格",
+    "displayLabelFallback": "平台精选",
+    "oneTimePrice": "{{price}} 一次性",
+    "periodicPrice": "{{price}} / 周期",
+    "pricingMode": {
+      "ONE_TIME": "一次性付费",
+      "PERIODIC": "周期付费"
+    }
   },
   "modal": {
     "title": "订阅管理",

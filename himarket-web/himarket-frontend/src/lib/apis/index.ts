@@ -4,6 +4,7 @@ import * as cliProvider from './cliProvider';
 import * as codingSession from './codingSession';
 import * as consumer from './consumer';
 import * as developer from './developer';
+import * as order from './order';
 import * as portal from './portal';
 import * as product from './product';
 
@@ -16,6 +17,7 @@ const APIs = {
   ...cliProvider,
   ...codingSession,
   ...portal,
+  ...order,
 };
 export default APIs;
 
@@ -28,3 +30,4 @@ export * from './chat';
 export * from './cliProvider';
 export * from './codingSession';
 export * from './portal';
+export * from './order';

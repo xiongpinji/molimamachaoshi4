@@ -565,21 +565,27 @@ function ModelDetail() {
             setLoginPromptOpen(true);
             return;
           }
-          if (hasSubscription) {
+          if (hasSubscription || data?.subscribable === false) {
             navigate('/chat', { state: { selectedProduct: data } });
-          } else {
-            message.warning(t('messages.subscribeFirst'));
-            headerRef.current?.showManageModal();
+            return;
           }
+          if (data?.feature?.commerceConfig?.enabled) {
+            headerRef.current?.showPurchaseFlow();
+            return;
+          }
+          message.warning(t('messages.subscribeFirst'));
+          headerRef.current?.showManageModal();
         }}
         size="large"
         type="primary"
       >
         {!isLoggedIn
           ? t('chat.loginCta')
-          : hasSubscription
+          : hasSubscription || data?.subscribable === false
             ? t('chat.startCta')
-            : t('chat.subscribeCta')}
+            : data?.feature?.commerceConfig?.enabled
+              ? t('chat.purchaseCta')
+              : t('chat.subscribeCta')}
       </Button>
     </div>
   );
@@ -660,6 +666,7 @@ function ModelDetail() {
       headerProps={
         data
           ? {
+              commerceConfig: data.feature?.commerceConfig,
               description: data.description,
               icon: data.icon,
               name: data.name,
