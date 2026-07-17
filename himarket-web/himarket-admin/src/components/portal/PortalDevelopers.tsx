@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { DataTable } from '@/components/common/DataTable';
 import { SubscriptionListModal } from '@/components/subscription/SubscriptionListModal';
+import { OrderListModal } from '@/components/subscription/OrderListModal';
 import { useLocale } from '@/contexts/LocaleContext';
 import { portalApi } from '@/lib/api';
 import { copyToClipboard, formatDateTime } from '@/lib/utils';
@@ -49,6 +50,7 @@ export function PortalDevelopers({ portal }: PortalDevelopersProps) {
 
   // 订阅列表相关状态
   const [subscriptionModalVisible, setSubscriptionModalVisible] = useState(false);
+  const [orderModalVisible, setOrderModalVisible] = useState(false);
   const [currentConsumer, setCurrentConsumer] = useState<Consumer | null>(null);
   const lastAutoFetchKeyRef = useRef('');
 
@@ -172,7 +174,11 @@ export function PortalDevelopers({ portal }: PortalDevelopersProps) {
     }
   };
 
-  // 查看订阅列表
+  const handleViewOrders = (consumer: Consumer) => {
+    setCurrentConsumer(consumer);
+    setOrderModalVisible(true);
+  };
+
   const handleViewSubscriptions = (consumer: Consumer) => {
     setCurrentConsumer(consumer);
     setSubscriptionModalVisible(true);
@@ -328,14 +334,24 @@ export function PortalDevelopers({ portal }: PortalDevelopersProps) {
     {
       key: 'action',
       render: (_: unknown, record: Consumer) => (
-        <Button
-          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 !px-2 text-xs"
-          icon={<EditOutlined />}
-          onClick={() => handleViewSubscriptions(record)}
-          type="text"
-        >
-          {t('portal.developers.manageSubscriptions')}
-        </Button>
+        <Space>
+          <Button
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 !px-2 text-xs"
+            icon={<EditOutlined />}
+            onClick={() => handleViewSubscriptions(record)}
+            type="text"
+          >
+            {t('portal.developers.manageSubscriptions')}
+          </Button>
+          <Button
+            className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 !px-2 text-xs"
+            icon={<ClockCircleOutlined />}
+            onClick={() => handleViewOrders(record)}
+            type="text"
+          >
+            {t('portal.developers.viewOrders')}
+          </Button>
+        </Space>
       ),
       title: t('common.operation'),
       width: 120,
@@ -394,6 +410,24 @@ export function PortalDevelopers({ portal }: PortalDevelopersProps) {
             value: consumerSearchName,
           }}
         />
+      </Modal>
+
+      <Modal
+        destroyOnClose
+        footer={null}
+        onCancel={() => setOrderModalVisible(false)}
+        open={orderModalVisible}
+        title={t('portal.orders.title', { name: currentConsumer?.name || '' })}
+        width={1100}
+      >
+        {currentConsumer && (
+          <OrderListModal
+            consumerId={currentConsumer.consumerId}
+            consumerName={currentConsumer.name}
+            onCancel={() => setOrderModalVisible(false)}
+            visible={orderModalVisible}
+          />
+        )}
       </Modal>
 
       {/* 订阅列表弹窗 */}

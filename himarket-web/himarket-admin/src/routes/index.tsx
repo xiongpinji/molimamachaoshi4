@@ -8,6 +8,7 @@ import Login from '@/pages/Login';
 import McpMonitor from '@/pages/McpMonitor';
 import ModelDashboard from '@/pages/ModelDashboard';
 import NacosConsoles from '@/pages/NacosConsoles';
+import OrderManagement from '@/pages/OrderManagement';
 import PortalDetail from '@/pages/PortalDetail';
 import Portals from '@/pages/Portals';
 import ProductCategories from '@/pages/ProductCategories';
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
       {
         element: <Portals />,
         path: 'portals',
+      },
+      {
+        element: <OrderManagement />,
+        path: 'orders',
       },
       {
         element: <PortalDetail />,

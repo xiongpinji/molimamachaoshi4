@@ -3,6 +3,7 @@ export * from './portal';
 export * from './api-product';
 export * from './gateway';
 export * from './subscription';
+export * from './order';
 export * from './consumer';
 export * from './api-request';
 

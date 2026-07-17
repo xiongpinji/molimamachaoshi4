@@ -114,6 +114,12 @@ const Layout: React.FC = () => {
       name: t('nav.categories'),
     },
     {
+      href: '/orders',
+      icon: DashboardOutlined,
+      key: 'orders',
+      name: t('nav.orders'),
+    },
+    {
       children: [
         {
           href: '/consoles/gateway',

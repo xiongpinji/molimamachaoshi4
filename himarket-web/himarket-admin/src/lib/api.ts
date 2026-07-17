@@ -157,6 +157,18 @@ export const portalApi = {
   approveConsumer: (consumerId: string) => {
     return api.patch(`/consumers/${consumerId}/status`);
   },
+  markOrderPaid: (consumerId: string, orderId: string) => {
+    return api.patch(`/consumers/${consumerId}/orders/${orderId}/paid`);
+  },
+  markOrderPaidByAdmin: (orderId: string) => {
+    return api.patch(`/orders/${orderId}/paid`);
+  },
+  cancelOrder: (consumerId: string, orderId: string) => {
+    return api.patch(`/consumers/${consumerId}/orders/${orderId}/cancel`);
+  },
+  cancelOrderByAdmin: (orderId: string) => {
+    return api.patch(`/orders/${orderId}/cancel`);
+  },
   // 审批订阅申请
   approveSubscription: (consumerId: string, productId: string) => {
     return api.patch(`/consumers/${consumerId}/subscriptions/${productId}`);
@@ -190,6 +202,25 @@ export const portalApi = {
         ...params,
       },
     });
+  },
+  // 获取后台顶层订单详情
+  getOrderDetail: (orderId: string) => {
+    return api.get(`/orders/${orderId}`);
+  },
+  // 获取后台顶层订单列表
+  getAllOrders: (params?: { page?: number; size?: number; status?: string; productName?: string }) => {
+    return api.get(`/orders`, { params });
+  },
+  // 获取Consumer的订单详情
+  getConsumerOrderDetail: (consumerId: string, orderId: string) => {
+    return api.get(`/consumers/${consumerId}/orders/${orderId}`);
+  },
+  // 获取Consumer的订单列表
+  getConsumerOrders: (
+    consumerId: string,
+    params?: { page?: number; size?: number; status?: string; productName?: string },
+  ) => {
+    return api.get(`/consumers/${consumerId}/orders`, { params });
   },
   // 获取Consumer的订阅列表
   getConsumerSubscriptions: (

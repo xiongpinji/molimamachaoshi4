@@ -1,4 +1,2 @@
-import type { UserConfigFnObject } from 'vite';
-
-declare const _default: UserConfigFnObject;
+declare const _default: import("vite").UserConfigFnObject;
 export default _default;

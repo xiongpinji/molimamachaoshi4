@@ -299,8 +299,19 @@ export interface ModelFeature {
   enableMultiModal?: boolean;
 }
 
+export type CommercePricingMode = 'ONE_TIME' | 'PERIODIC';
+
+export interface CommerceConfig {
+  enabled?: boolean;
+  pricingMode?: CommercePricingMode;
+  amount?: number;
+  currency?: string;
+  displayLabel?: string;
+}
+
 export interface ProductFeature {
   modelFeature?: ModelFeature;
+  commerceConfig?: CommerceConfig;
   skillConfig?: ApiProductSkillConfig;
   workerConfig?: ApiProductWorkerConfig;
 }
