@@ -16,9 +16,9 @@ import { ChangePasswordForm } from '../components/ChangePasswordForm';
 import { Layout } from '../components/Layout';
 import { notifyAuthInvalidated } from '../hooks/useAuth';
 import APIs, { type IDeveloperInfo } from '../lib/apis';
-import { getOrderStatusColor, getOrderStatusLabel } from '../lib/utils/orderStatus';
 import { clearCachedUserInfo } from '../lib/userInfoCache';
 import { formatDateTime } from '../lib/utils';
+import { getOrderStatusColor, getOrderStatusLabel } from '../lib/utils/orderStatus';
 
 type ProfileSection = 'identity' | 'orders' | 'profile' | 'security';
 

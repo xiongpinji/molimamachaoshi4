@@ -7,8 +7,8 @@ describe('resolveProductAccessState', () => {
     expect(
       resolveProductAccessState({
         hasApprovedSubscription: false,
-        hasPendingPaymentOrder: false,
         hasPaidOrder: false,
+        hasPendingPaymentOrder: false,
         hasPendingSubscription: false,
         isLoggedIn: false,
         isPaid: true,
@@ -21,8 +21,8 @@ describe('resolveProductAccessState', () => {
     expect(
       resolveProductAccessState({
         hasApprovedSubscription: false,
-        hasPendingPaymentOrder: false,
         hasPaidOrder: false,
+        hasPendingPaymentOrder: false,
         hasPendingSubscription: false,
         isLoggedIn: true,
         isPaid: true,
@@ -35,8 +35,8 @@ describe('resolveProductAccessState', () => {
     expect(
       resolveProductAccessState({
         hasApprovedSubscription: false,
-        hasPendingPaymentOrder: true,
         hasPaidOrder: false,
+        hasPendingPaymentOrder: true,
         hasPendingSubscription: false,
         isLoggedIn: true,
         isPaid: true,
@@ -49,8 +49,8 @@ describe('resolveProductAccessState', () => {
     expect(
       resolveProductAccessState({
         hasApprovedSubscription: false,
-        hasPendingPaymentOrder: false,
         hasPaidOrder: true,
+        hasPendingPaymentOrder: false,
         hasPendingSubscription: false,
         isLoggedIn: true,
         isPaid: true,
@@ -63,8 +63,8 @@ describe('resolveProductAccessState', () => {
     expect(
       resolveProductAccessState({
         hasApprovedSubscription: false,
-        hasPendingPaymentOrder: false,
         hasPaidOrder: false,
+        hasPendingPaymentOrder: false,
         hasPendingSubscription: true,
         isLoggedIn: true,
         isPaid: true,
@@ -77,8 +77,8 @@ describe('resolveProductAccessState', () => {
     expect(
       resolveProductAccessState({
         hasApprovedSubscription: true,
-        hasPendingPaymentOrder: false,
         hasPaidOrder: false,
+        hasPendingPaymentOrder: false,
         hasPendingSubscription: false,
         isLoggedIn: true,
         isPaid: true,
@@ -91,8 +91,8 @@ describe('resolveProductAccessState', () => {
     expect(
       resolveProductAccessState({
         hasApprovedSubscription: false,
-        hasPendingPaymentOrder: false,
         hasPaidOrder: false,
+        hasPendingPaymentOrder: false,
         hasPendingSubscription: false,
         isLoggedIn: false,
         isPaid: false,
@@ -105,8 +105,8 @@ describe('resolveProductAccessState', () => {
     expect(
       resolveProductAccessState({
         hasApprovedSubscription: false,
-        hasPendingPaymentOrder: false,
         hasPaidOrder: false,
+        hasPendingPaymentOrder: false,
         hasPendingSubscription: false,
         isLoggedIn: true,
         isPaid: true,

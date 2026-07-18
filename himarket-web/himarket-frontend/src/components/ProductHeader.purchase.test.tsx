@@ -6,8 +6,8 @@ const mocks = vi.hoisted(() => ({
   getActiveProductOrder: vi.fn(),
   getConsumers: vi.fn(),
   getPrimaryConsumer: vi.fn(),
-  getProductSubscriptionStatus: vi.fn(),
   getProductSubscriptions: vi.fn(),
+  getProductSubscriptionStatus: vi.fn(),
   messageError: vi.fn(),
   messageSuccess: vi.fn(),
   messageWarning: vi.fn(),
@@ -62,7 +62,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('antd', async () => {
-  const actual = await vi.importActual<typeof import('antd')>('antd');
+  const actual = await vi.importActual('antd');
   return {
     ...actual,
     message: {
@@ -134,12 +134,12 @@ describe('ProductHeader purchase flow', () => {
     });
     mocks.getPrimaryConsumer.mockResolvedValue({ data: { consumerId: 'consumer-a' } });
     mocks.getActiveProductOrder.mockResolvedValue({
-      orderId: 'order-a',
-      productId: 'product-a',
-      productName: 'Legal Assistant',
       amount: 99.9,
       currency: 'CNY',
+      orderId: 'order-a',
       pricingMode: 'ONE_TIME',
+      productId: 'product-a',
+      productName: 'Legal Assistant',
       status: 'PENDING_PAYMENT',
     });
 
@@ -171,12 +171,12 @@ describe('ProductHeader purchase flow', () => {
     });
     mocks.getPrimaryConsumer.mockResolvedValue({ data: { consumerId: 'consumer-a' } });
     mocks.getActiveProductOrder.mockResolvedValueOnce(null).mockResolvedValueOnce({
-      orderId: 'order-b',
-      productId: 'product-a',
-      productName: 'Legal Assistant',
       amount: 99.9,
       currency: 'CNY',
+      orderId: 'order-b',
       pricingMode: 'ONE_TIME',
+      productId: 'product-a',
+      productName: 'Legal Assistant',
       status: 'PENDING_PAYMENT',
     });
     mocks.createProductOrder.mockRejectedValue(new Error('duplicate active order'));

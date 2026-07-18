@@ -59,7 +59,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('antd', async () => {
-  const actual = await vi.importActual<typeof import('antd')>('antd');
+  const actual = await vi.importActual('antd');
   return {
     ...actual,
     message: {

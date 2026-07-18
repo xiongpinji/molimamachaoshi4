@@ -94,11 +94,11 @@ const getIconUrl = (icon?: IProductIcon, defaultIcon?: string): string => {
 export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>(
   (
     {
+      commerceConfig,
       defaultIcon = '/default-icon.png',
       description,
       icon,
       name,
-      commerceConfig,
       onSubscriptionStatusChange,
       productType,
       subscribable,
@@ -167,8 +167,8 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
     const hasPaidOrder = activeOrder?.status === 'PAID';
     const accessState = resolveProductAccessState({
       hasApprovedSubscription,
-      hasPendingPaymentOrder,
       hasPaidOrder,
+      hasPendingPaymentOrder,
       hasPendingSubscription,
       isLoggedIn,
       isPaid,

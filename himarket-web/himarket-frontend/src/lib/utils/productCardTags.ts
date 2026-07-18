@@ -69,7 +69,12 @@ export function formatCommercePrice(
   commerceConfig: ICommerceConfig | undefined,
   t: TFunction,
 ): string | undefined {
-  if (!commerceConfig?.enabled || commerceConfig.amount == null || !commerceConfig.currency) {
+  if (
+    commerceConfig?.enabled !== true ||
+    commerceConfig.amount === null ||
+    commerceConfig.amount === undefined ||
+    !commerceConfig.currency
+  ) {
     return undefined;
   }
 

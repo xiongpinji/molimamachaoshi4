@@ -293,8 +293,9 @@ describe('Profile order history', () => {
 
     fireEvent.mouseDown(screen.getByRole('combobox'));
     const paidOptions = screen.getAllByText('已支付');
-    expect(paidOptions.length).toBeGreaterThan(1);
-    fireEvent.click(paidOptions[1]!);
+    const paidOption = paidOptions.at(1);
+    expect(paidOption).toBeDefined();
+    fireEvent.click(paidOption as HTMLElement);
 
     await waitFor(() => {
       expect(screen.getByText('Legal Assistant')).toBeInTheDocument();

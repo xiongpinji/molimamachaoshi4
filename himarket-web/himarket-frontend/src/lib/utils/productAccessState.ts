@@ -13,9 +13,9 @@ export type ProductAccessState =
 
 interface ResolveProductAccessStateInput {
   hasApprovedSubscription: boolean;
-  hasPendingSubscription: boolean;
-  hasPendingPaymentOrder: boolean;
   hasPaidOrder: boolean;
+  hasPendingPaymentOrder: boolean;
+  hasPendingSubscription: boolean;
   isLoggedIn: boolean;
   isPaid: boolean;
   subscribable: boolean;
@@ -23,9 +23,9 @@ interface ResolveProductAccessStateInput {
 
 export function resolveProductAccessState({
   hasApprovedSubscription,
-  hasPendingSubscription,
-  hasPendingPaymentOrder,
   hasPaidOrder,
+  hasPendingPaymentOrder,
+  hasPendingSubscription,
   isLoggedIn,
   isPaid,
   subscribable,

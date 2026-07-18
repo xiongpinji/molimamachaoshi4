@@ -1,6 +1,6 @@
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { Button, Descriptions, Drawer, Modal, message } from 'antd';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { DataTable } from '@/components/common/DataTable';
 import { useLocale } from '@/contexts/LocaleContext';
@@ -25,12 +25,12 @@ interface OrderListModalProps extends ProductOrderModalProps {
 }
 
 export function OrderListModal({
-  visible,
   consumerId,
   consumerName,
+  embedded = false,
   onCancel,
   useTopLevelApi = false,
-  embedded = false,
+  visible,
 }: OrderListModalProps) {
   const { t } = useLocale();
   const [orders, setOrders] = useState<ProductOrder[]>([]);
@@ -45,40 +45,39 @@ export function OrderListModal({
     total: 0,
   });
 
-  const fetchOrders = (
-    page = pagination.current,
-    size = pagination.pageSize,
-    productName?: string,
-  ) => {
-    setLoading(true);
-    const request = useTopLevelApi
-      ? portalApi.getAllOrders({ page, productName, size })
-      : portalApi.getConsumerOrders(consumerId, {
-          page,
-          productName,
-          size,
+  const fetchOrders = useCallback(
+    (page: number, size: number, productName?: string) => {
+      setLoading(true);
+      const request = useTopLevelApi
+        ? portalApi.getAllOrders({ page, productName, size })
+        : portalApi.getConsumerOrders(consumerId, {
+            page,
+            productName,
+            size,
+          });
+      request
+        .then((res: ConsumerOrderResponse) => {
+          setOrders(res.data?.content || []);
+          setPagination((prev) => ({
+            ...prev,
+            current: page,
+            pageSize: size,
+            total: res.data?.totalElements || 0,
+          }));
+        })
+        .finally(() => {
+          setLoading(false);
         });
-    request
-      .then((res: ConsumerOrderResponse) => {
-        setOrders(res.data?.content || []);
-        setPagination((prev) => ({
-          ...prev,
-          current: page,
-          pageSize: size,
-          total: res.data?.totalElements || 0,
-        }));
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+    },
+    [consumerId, useTopLevelApi],
+  );
 
   useEffect(() => {
     if (visible && consumerId) {
       setProductNameSearch('');
       fetchOrders(1, pagination.pageSize);
     }
-  }, [visible, consumerId]);
+  }, [visible, consumerId, fetchOrders, pagination.pageSize]);
 
   const openOrderDetail = (orderId: string) => {
     const request = useTopLevelApi

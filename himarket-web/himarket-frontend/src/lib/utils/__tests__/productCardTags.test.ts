@@ -13,8 +13,8 @@ const translations: Record<string, string> = {
   multiModal: 'Multi-modal',
   oneTimePrice: '{{price}} one-time',
   openAiCompatible: 'OpenAI-compatible',
-  restEndpoint: 'REST endpoint',
   rerank: 'Rerank',
+  restEndpoint: 'REST endpoint',
   textGeneration: 'Text',
   webSearch: 'Web search',
 };
