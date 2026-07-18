@@ -400,6 +400,7 @@ function ApiDetailPage() {
       headerProps={
         apiData
           ? {
+              commerceConfig: apiData.feature?.commerceConfig,
               defaultIcon: '/logo.svg',
               description: apiData.description,
               icon: apiData.icon,

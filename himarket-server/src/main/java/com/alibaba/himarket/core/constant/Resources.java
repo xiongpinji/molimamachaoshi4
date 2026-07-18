@@ -75,5 +75,7 @@ public class Resources {
 
     public static final String API_DEFINITION = "ApiDefinition";
 
+    public static final String PRODUCT_ORDER = "ProductOrder";
+
     public static final String API_SANDBOX_DEPLOYMENT = "ApiSandboxDeployment";
 }

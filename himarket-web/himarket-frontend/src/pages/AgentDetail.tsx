@@ -751,6 +751,7 @@ function AgentDetail() {
         data
           ? {
               agentConfig: agentConfig,
+              commerceConfig: data.feature?.commerceConfig,
               description: data.description,
               icon: data.icon,
               name: data.name,

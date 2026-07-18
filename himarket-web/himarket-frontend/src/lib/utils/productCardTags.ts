@@ -1,6 +1,7 @@
 import * as yaml from 'js-yaml';
 
 import type { IProductDetail } from '../apis/product';
+import type { ICommerceConfig } from '../apis/typing';
 import type { TFunction } from 'i18next';
 
 const HTTP_METHODS = new Set(['delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']);
@@ -49,6 +50,42 @@ function normalizeLabel(value?: string | null) {
 
 function compactTags(tags: Array<string | undefined>, limit = 2) {
   return Array.from(new Set(tags.filter((tag): tag is string => Boolean(tag)))).slice(0, limit);
+}
+
+function formatCurrency(amount: number, currency: string) {
+  try {
+    return new Intl.NumberFormat('zh-CN', {
+      currency,
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+      style: 'currency',
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toFixed(2)}`;
+  }
+}
+
+export function formatCommercePrice(
+  commerceConfig: ICommerceConfig | undefined,
+  t: TFunction,
+): string | undefined {
+  if (
+    commerceConfig?.enabled !== true ||
+    commerceConfig.amount === null ||
+    commerceConfig.amount === undefined ||
+    !commerceConfig.currency
+  ) {
+    return undefined;
+  }
+
+  const price = formatCurrency(commerceConfig.amount, commerceConfig.currency);
+  if (commerceConfig.pricingMode === 'ONE_TIME') {
+    return t('oneTimePrice', { price });
+  }
+  if (commerceConfig.pricingMode === 'PERIODIC') {
+    return t('periodicPrice', { price });
+  }
+  return price;
 }
 
 function getModelCategoryLabel(category: string | undefined, t: TFunction) {

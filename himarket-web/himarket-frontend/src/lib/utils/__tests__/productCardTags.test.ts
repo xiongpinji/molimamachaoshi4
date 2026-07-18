@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { countOpenApiEndpoints, getProductCardTags } from '../productCardTags';
+import { countOpenApiEndpoints, formatCommercePrice, getProductCardTags } from '../productCardTags';
 
 import type { IProductDetail } from '../../apis/product';
 import type { TFunction } from 'i18next';
@@ -11,15 +11,20 @@ const translations: Record<string, string> = {
   endpointCountSingle: '{{count}} endpoint',
   imageGeneration: 'Image',
   multiModal: 'Multi-modal',
+  oneTimePrice: '{{price}} one-time',
   openAiCompatible: 'OpenAI-compatible',
+  rerank: 'Rerank',
   restEndpoint: 'REST endpoint',
   textGeneration: 'Text',
   webSearch: 'Web search',
 };
 
-const t = ((key: string, options?: { count?: number }) => {
+const t = ((key: string, options?: { count?: number; price?: string }) => {
   const value = translations[key] ?? key;
-  return options?.count === undefined ? value : value.replace('{{count}}', String(options.count));
+  if (!options) return value;
+  return value
+    .replace('{{count}}', String(options.count ?? ''))
+    .replace('{{price}}', String(options.price ?? ''));
 }) as TFunction;
 
 function product(overrides: Partial<IProductDetail>): IProductDetail {
@@ -140,5 +145,38 @@ paths:
     );
 
     expect(tags).toEqual(['2 endpoints']);
+  });
+
+  it('格式化一次性收费价格', () => {
+    expect(
+      formatCommercePrice(
+        { amount: 99.9, currency: 'CNY', enabled: true, pricingMode: 'ONE_TIME' },
+        t,
+      ),
+    ).toBe('¥99.90 one-time');
+  });
+
+  it('Agent 协议标签保持不变，价格由卡片独立展示', () => {
+    const tags = getProductCardTags(
+      product({
+        agentConfig: {
+          agentAPIConfig: {
+            agentProtocols: ['a2a', 'OPENAI_COMPATIBLE'],
+          },
+        },
+        feature: {
+          commerceConfig: {
+            amount: 99.9,
+            currency: 'CNY',
+            enabled: true,
+            pricingMode: 'ONE_TIME',
+          },
+        },
+        type: 'AGENT_API',
+      }),
+      t,
+    );
+
+    expect(tags).toEqual(['A2A', 'OpenAI-compatible']);
   });
 });

@@ -25,7 +25,7 @@ import {
 } from 'antd';
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { LoginPrompt } from './LoginPrompt';
 import { useAuth } from '../hooks/useAuth';
@@ -35,16 +35,19 @@ import {
   unsubscribeProduct,
   getProductSubscriptions,
 } from '../lib/apis';
-import APIs, { type ISubscription } from '../lib/apis';
+import APIs, { type ISubscription, type ProductOrder } from '../lib/apis';
+import { resolveProductAccessState } from '../lib/utils/productAccessState';
+import { formatCommercePrice } from '../lib/utils/productCardTags';
 
 import type { getProductSubscriptionStatus } from '../lib/apis';
-import type { IMCPConfig, IProductIcon, IAgentConfig } from '../lib/apis/typing';
+import type { ICommerceConfig, IMCPConfig, IProductIcon, IAgentConfig } from '../lib/apis/typing';
 import type { Consumer } from '../types/consumer';
 
 const { Paragraph, Title } = Typography;
 
 export interface ProductHeaderHandle {
   showManageModal: () => void;
+  showPurchaseFlow: () => void;
 }
 
 interface ProductHeaderProps {
@@ -54,6 +57,7 @@ interface ProductHeaderProps {
   defaultIcon?: string;
   mcpConfig?: IMCPConfig;
   agentConfig?: IAgentConfig;
+  commerceConfig?: ICommerceConfig;
   updatedAt?: string;
   productType?: 'REST_API' | 'MCP_SERVER' | 'AGENT_API' | 'MODEL_API' | 'AGENT_SKILL';
   subscribable?: boolean;
@@ -90,6 +94,7 @@ const getIconUrl = (icon?: IProductIcon, defaultIcon?: string): string => {
 export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>(
   (
     {
+      commerceConfig,
       defaultIcon = '/default-icon.png',
       description,
       icon,
@@ -102,6 +107,7 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
     ref,
   ) => {
     const { agentProductId, apiProductId, mcpProductId, modelProductId } = useParams();
+    const navigate = useNavigate();
 
     const { isLoggedIn } = useAuth();
     const { i18n, t } = useTranslation('productHeader');
@@ -119,12 +125,15 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
     // 分开管理不同的loading状态
     const [consumersLoading, setConsumersLoading] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
+    const [purchaseLoading, setPurchaseLoading] = useState(false);
+    const [activeOrderLoading, setActiveOrderLoading] = useState(false);
     const [imageLoadFailed, setImageLoadFailed] = useState(false);
 
     // 订阅状态相关的state
     const [subscriptionStatus, setSubscriptionStatus] =
       useState<UnwrapPromise<ReturnType<typeof getProductSubscriptionStatus>>>();
     const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+    const [activeOrder, setActiveOrder] = useState<ProductOrder | null>(null);
 
     // 订阅详情分页数据（用于管理弹窗）
     const [subscriptionDetails, setSubscriptionDetails] = useState<{
@@ -138,6 +147,33 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
     const [searchKeyword, setSearchKeyword] = useState('');
 
     const shouldShowSubscribeButton = subscribable !== false;
+    const priceText = formatCommercePrice(commerceConfig, t);
+    const pricingModeText = commerceConfig?.pricingMode
+      ? t(`commerce.pricingMode.${commerceConfig.pricingMode}`)
+      : undefined;
+    const commerceLabel = commerceConfig?.displayLabel || t('commerce.displayLabelFallback');
+    const isPaid = Boolean(commerceConfig?.enabled && priceText);
+    const hasApprovedSubscription = Boolean(
+      subscriptionStatus?.subscribedConsumers?.some(
+        (item) => item.subscription?.status === 'APPROVED',
+      ),
+    );
+    const hasPendingSubscription = Boolean(
+      subscriptionStatus?.subscribedConsumers?.some(
+        (item) => item.subscription?.status === 'PENDING',
+      ),
+    );
+    const hasPendingPaymentOrder = activeOrder?.status === 'PENDING_PAYMENT';
+    const hasPaidOrder = activeOrder?.status === 'PAID';
+    const accessState = resolveProductAccessState({
+      hasApprovedSubscription,
+      hasPaidOrder,
+      hasPendingPaymentOrder,
+      hasPendingSubscription,
+      isLoggedIn,
+      isPaid,
+      subscribable: shouldShowSubscribeButton,
+    });
 
     // 获取产品ID - 根据产品类型获取正确的参数
     const productId = apiProductId || mcpProductId || agentProductId || modelProductId || '';
@@ -157,17 +193,55 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
       }
     }, [productId, shouldShowSubscribeButton]);
 
+    const fetchActiveOrder = React.useCallback(async () => {
+      if (!productId || !isLoggedIn || !isPaid) {
+        setActiveOrder(null);
+        return;
+      }
+
+      setActiveOrderLoading(true);
+      try {
+        const primaryConsumerResponse = await APIs.getPrimaryConsumer();
+        const primaryConsumerId = primaryConsumerResponse.data?.consumerId;
+        if (!primaryConsumerId) {
+          setActiveOrder(null);
+          return;
+        }
+        const order = await APIs.getActiveProductOrder(primaryConsumerId, productId);
+        setActiveOrder(order);
+      } catch (error) {
+        console.error('获取活跃订单失败:', error);
+        setActiveOrder(null);
+      } finally {
+        setActiveOrderLoading(false);
+      }
+    }, [isLoggedIn, isPaid, productId]);
+
     // 暴露给父组件的方法
     useImperativeHandle(ref, () => ({
       showManageModal,
+      showPurchaseFlow: () => {
+        if (
+          accessState === 'purchase_continue_payment' ||
+          accessState === 'purchase_activation_processing'
+        ) {
+          handleViewOrder();
+          return;
+        }
+        if (isPaid && !hasApprovedSubscription) {
+          void handlePurchase();
+          return;
+        }
+        showManageModal();
+      },
     }));
 
     // 订阅状态变化时通知父组件
     useEffect(() => {
       if (subscriptionStatus !== undefined && onSubscriptionStatusChange) {
-        onSubscriptionStatusChange(subscriptionStatus.hasSubscription);
+        onSubscriptionStatusChange(hasApprovedSubscription);
       }
-    }, [subscriptionStatus, onSubscriptionStatusChange]);
+    }, [hasApprovedSubscription, onSubscriptionStatusChange, subscriptionStatus]);
 
     // 获取订阅详情（用于管理弹窗）
     const fetchSubscriptionDetails = async (
@@ -200,6 +274,10 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
     useEffect(() => {
       fetchSubscriptionStatus();
     }, [fetchSubscriptionStatus]);
+
+    useEffect(() => {
+      fetchActiveOrder();
+    }, [fetchActiveOrder]);
 
     // 获取消费者列表
     const fetchConsumers = async () => {
@@ -254,6 +332,54 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
         message.error(t('message.applyFailed'));
       } finally {
         setSubmitLoading(false);
+      }
+    };
+
+    const handlePurchase = async () => {
+      if (!productId) {
+        return;
+      }
+
+      try {
+        setPurchaseLoading(true);
+        const primaryConsumerResponse = await APIs.getPrimaryConsumer();
+        const primaryConsumerId = primaryConsumerResponse.data?.consumerId;
+
+        if (!primaryConsumerId) {
+          message.warning(t('purchase.primaryConsumerRequired'));
+          return;
+        }
+
+        const orderResponse = await APIs.createProductOrder(primaryConsumerId, productId);
+        const orderId = orderResponse.data?.orderId;
+
+        if (!orderId) {
+          throw new Error('Order ID missing');
+        }
+
+        navigate(`/orders/${orderId}`);
+      } catch (error) {
+        console.error('购买失败:', error);
+        const primaryConsumerResponse = await APIs.getPrimaryConsumer().catch(() => null);
+        const primaryConsumerId = primaryConsumerResponse?.data?.consumerId;
+        if (primaryConsumerId) {
+          const existingOrder = await APIs.getActiveProductOrder(primaryConsumerId, productId);
+          if (existingOrder?.orderId) {
+            message.warning(t('purchase.existingOrder'));
+            setActiveOrder(existingOrder);
+            navigate(`/orders/${existingOrder.orderId}`);
+            return;
+          }
+        }
+        message.error(t('purchase.failed'));
+      } finally {
+        setPurchaseLoading(false);
+      }
+    };
+
+    const handleViewOrder = () => {
+      if (activeOrder?.orderId) {
+        navigate(`/orders/${activeOrder.orderId}`);
       }
     };
 
@@ -398,44 +524,87 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
               </div>
 
               <div className="flex flex-shrink-0 flex-wrap items-center gap-3 lg:justify-end">
-                {shouldShowSubscribeButton ? (
-                  !isLoggedIn ? (
-                    <Button
-                      className="rounded-[10px]"
-                      onClick={() => setLoginPromptOpen(true)}
-                      type="primary"
-                    >
-                      {t('subscribe.loginRequired')}
-                    </Button>
-                  ) : subscriptionLoading ? (
-                    <Button loading>{t('loading')}</Button>
-                  ) : (
-                    <>
-                      {subscriptionStatus?.hasSubscription ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-green-100 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-600">
-                          <CheckCircleFilled
-                            className="text-green-500"
-                            style={{ fontSize: '10px' }}
-                          />
-                          {t('subscribe.subscribed')}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
-                          <div className="h-1.5 w-1.5 rounded-full bg-gray-400"></div>
-                          {t('subscribe.notSubscribed')}
-                        </span>
-                      )}
-
-                      <Button className="rounded-[10px]" onClick={showManageModal} type="primary">
-                        {t('subscribe.manage')}
-                      </Button>
-                    </>
-                  )
-                ) : (
+                {accessState === 'open_access' ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500">
                     <InfoCircleOutlined className="text-gray-400" style={{ fontSize: '12px' }} />
                     {t('subscribe.openAccess')}
                   </span>
+                ) : accessState === 'purchase_login' ? (
+                  <Button
+                    className="rounded-[10px]"
+                    onClick={() => setLoginPromptOpen(true)}
+                    type="primary"
+                  >
+                    {t('purchase.loginRequired')}
+                  </Button>
+                ) : accessState === 'subscribe_login' ? (
+                  <Button
+                    className="rounded-[10px]"
+                    onClick={() => setLoginPromptOpen(true)}
+                    type="primary"
+                  >
+                    {t('subscribe.loginRequired')}
+                  </Button>
+                ) : subscriptionLoading || activeOrderLoading ? (
+                  <Button loading>{t('loading')}</Button>
+                ) : (
+                  <>
+                    {hasApprovedSubscription ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-green-100 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-600">
+                        <CheckCircleFilled
+                          className="text-green-500"
+                          style={{ fontSize: '10px' }}
+                        />
+                        {isPaid ? t('purchase.active') : t('subscribe.subscribed')}
+                      </span>
+                    ) : accessState === 'purchase_continue_payment' ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600">
+                        <ClockCircleFilled
+                          className="text-amber-500"
+                          style={{ fontSize: '10px' }}
+                        />
+                        {t('purchase.continuePayment')}
+                      </span>
+                    ) : accessState === 'purchase_activation_processing' ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
+                        <ClockCircleFilled className="text-blue-500" style={{ fontSize: '10px' }} />
+                        {t('purchase.activationProcessing')}
+                      </span>
+                    ) : hasPendingSubscription ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
+                        <ClockCircleFilled className="text-blue-500" style={{ fontSize: '10px' }} />
+                        {isPaid ? t('purchase.pending') : t('subscribe.pending')}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
+                        <div className="h-1.5 w-1.5 rounded-full bg-gray-400"></div>
+                        {isPaid ? t('purchase.available') : t('subscribe.notSubscribed')}
+                      </span>
+                    )}
+
+                    <Button
+                      className="rounded-[10px]"
+                      loading={purchaseLoading}
+                      onClick={
+                        accessState === 'purchase_continue_payment' ||
+                        accessState === 'purchase_activation_processing'
+                          ? handleViewOrder
+                          : isPaid && !hasApprovedSubscription
+                            ? handlePurchase
+                            : showManageModal
+                      }
+                      type="primary"
+                    >
+                      {accessState === 'purchase_continue_payment' ||
+                      accessState === 'purchase_activation_processing'
+                        ? t('purchase.viewOrder')
+                        : isPaid && !hasApprovedSubscription
+                          ? t('purchase.action')
+                          : isPaid
+                            ? t('purchase.manage')
+                            : t('subscribe.manage')}
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
@@ -444,6 +613,23 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
               <Paragraph className="!mb-0 max-w-5xl break-words text-sm leading-6 text-gray-600">
                 {description}
               </Paragraph>
+            )}
+
+            {priceText && (
+              <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[#F6D7A8] bg-[#FFF8EC] px-4 py-3">
+                <div>
+                  <div className="text-xs font-medium text-[#8A5A10]">
+                    {t('commerce.priceTitle')}
+                  </div>
+                  <div className="mt-1 text-lg font-semibold text-[#8A4B08]">{priceText}</div>
+                </div>
+                <span className="inline-flex items-center rounded-full border border-[#F0C98A] bg-white/80 px-2.5 py-1 text-xs font-medium text-[#A25B00]">
+                  {commerceLabel}
+                </span>
+                {pricingModeText && (
+                  <span className="text-xs text-[#8A5A10]">{pricingModeText}</span>
+                )}
+              </div>
             )}
           </div>
         </div>

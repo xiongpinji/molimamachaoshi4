@@ -32,6 +32,8 @@ public class ProductFeature {
 
     private ModelFeature modelFeature;
 
+    private CommerceConfig commerceConfig;
+
     private SkillConfig skillConfig;
 
     private WorkerConfig workerConfig;

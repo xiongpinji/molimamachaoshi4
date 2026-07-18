@@ -1,5 +1,17 @@
 import { CameraOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Select, Image, message, Switch, Radio, Space } from 'antd';
+import {
+  Modal,
+  Form,
+  Input,
+  Select,
+  Image,
+  message,
+  Switch,
+  Radio,
+  Space,
+  Divider,
+  InputNumber,
+} from 'antd';
 import { useState, useEffect } from 'react';
 
 import { useLocale } from '@/contexts/LocaleContext';
@@ -241,6 +253,13 @@ export default function ApiProductFormModal({
             mergedFeature.modelFeature = {
               ...initialData.feature.modelFeature,
               ...(otherValues.feature?.modelFeature || {}),
+            };
+          }
+
+          if (initialData.feature.commerceConfig || otherValues.feature?.commerceConfig) {
+            mergedFeature.commerceConfig = {
+              ...initialData.feature.commerceConfig,
+              ...(otherValues.feature?.commerceConfig || {}),
             };
           }
 
@@ -589,6 +608,76 @@ export default function ApiProductFormModal({
         )}
 
         {/* Feature Configuration */}
+        {productType === 'AGENT_API' && (
+          <>
+            <Divider style={{ marginBottom: 16, marginTop: 0 }} titlePlacement="left">
+              {t('product.form.commerceTitle')}
+            </Divider>
+            <Form.Item
+              label={t('product.form.commerceEnabled')}
+              name={['feature', 'commerceConfig', 'enabled']}
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+            <Form.Item noStyle shouldUpdate>
+              {({ getFieldValue }) => {
+                const enabled = getFieldValue(['feature', 'commerceConfig', 'enabled']);
+                if (!enabled) {
+                  return null;
+                }
+
+                return (
+                  <>
+                    <Form.Item
+                      label={t('product.form.pricingMode')}
+                      name={['feature', 'commerceConfig', 'pricingMode']}
+                      rules={[{ message: t('product.form.pricingModeRequired'), required: true }]}
+                    >
+                      <Select placeholder={t('product.form.pricingModePlaceholder')}>
+                        <Select.Option value="ONE_TIME">
+                          {t('product.form.pricingModeOneTime')}
+                        </Select.Option>
+                        <Select.Option value="PERIODIC">
+                          {t('product.form.pricingModePeriodic')}
+                        </Select.Option>
+                      </Select>
+                    </Form.Item>
+                    <Form.Item
+                      label={t('product.form.priceAmount')}
+                      name={['feature', 'commerceConfig', 'amount']}
+                      rules={[{ message: t('product.form.priceAmountRequired'), required: true }]}
+                    >
+                      <InputNumber
+                        min={0}
+                        placeholder={t('product.form.priceAmountPlaceholder')}
+                        precision={2}
+                        step={0.01}
+                        style={{ width: '100%' }}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label={t('product.form.currency')}
+                      name={['feature', 'commerceConfig', 'currency']}
+                      rules={[{ message: t('product.form.currencyRequired'), required: true }]}
+                    >
+                      <Select placeholder={t('product.form.currencyPlaceholder')}>
+                        <Select.Option value="CNY">CNY</Select.Option>
+                        <Select.Option value="USD">USD</Select.Option>
+                      </Select>
+                    </Form.Item>
+                    <Form.Item
+                      label={t('product.form.displayLabel')}
+                      name={['feature', 'commerceConfig', 'displayLabel']}
+                    >
+                      <Input placeholder={t('product.form.displayLabelPlaceholder')} />
+                    </Form.Item>
+                  </>
+                );
+              }}
+            </Form.Item>
+          </>
+        )}
         {productType === 'MODEL_API' && (
           <ModelFeatureForm initialExpanded={isEditMode && !!initialData?.feature} />
         )}

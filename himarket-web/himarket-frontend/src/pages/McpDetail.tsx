@@ -718,6 +718,7 @@ function McpDetail() {
       headerProps={
         data
           ? {
+              commerceConfig: data.feature?.commerceConfig,
               defaultIcon: '/MCP.svg',
               description: description || '',
               icon: data.icon,

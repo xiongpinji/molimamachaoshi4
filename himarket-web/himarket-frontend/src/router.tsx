@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import McpDetail from './pages/McpDetail';
 import ModelDetail from './pages/ModelDetail';
 import OidcCallback from './pages/OidcCallback';
+import OrderDetail from './pages/OrderDetail';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
 import SkillDetail from './pages/SkillDetail';
@@ -102,6 +103,14 @@ export function Router() {
         <Route element={<McpDetail />} path="/mcp/:mcpProductId" />
         <Route element={<AgentDetail />} path="/agents/:agentProductId" />
         <Route element={<ModelDetail />} path="/models/:modelProductId" />
+        <Route
+          element={
+            <RequireAuth>
+              <OrderDetail />
+            </RequireAuth>
+          }
+          path="/orders/:orderId"
+        />
         <Route element={<Login />} path="/login" />
         <Route element={<Register />} path="/register" />
         <Route

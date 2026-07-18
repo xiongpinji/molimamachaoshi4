@@ -165,6 +165,12 @@ export const portalApi = {
   bindDomain: (portalId: string, domainData: { domain: string; type: string }) => {
     return api.post(`/portals/${portalId}/domains`, domainData);
   },
+  cancelOrder: (consumerId: string, orderId: string) => {
+    return api.patch(`/consumers/${consumerId}/orders/${orderId}/cancel`);
+  },
+  cancelOrderByAdmin: (orderId: string) => {
+    return api.patch(`/orders/${orderId}/cancel`);
+  },
   createPortal: (data: CreatePortalRequest) => {
     return api.post(`/portals`, data);
   },
@@ -178,6 +184,15 @@ export const portalApi = {
   deleteSubscription: (consumerId: string, productId: string) => {
     return api.delete(`/consumers/${consumerId}/subscriptions/${productId}`);
   },
+  // 获取后台顶层订单列表
+  getAllOrders: (params?: {
+    page?: number;
+    size?: number;
+    status?: string;
+    productName?: string;
+  }) => {
+    return api.get(`/orders`, { params });
+  },
   getConsumerList: (
     portalId: string,
     developerId: string,
@@ -190,6 +205,17 @@ export const portalApi = {
         ...params,
       },
     });
+  },
+  // 获取Consumer的订单详情
+  getConsumerOrderDetail: (consumerId: string, orderId: string) => {
+    return api.get(`/consumers/${consumerId}/orders/${orderId}`);
+  },
+  // 获取Consumer的订单列表
+  getConsumerOrders: (
+    consumerId: string,
+    params?: { page?: number; size?: number; status?: string; productName?: string },
+  ) => {
+    return api.get(`/consumers/${consumerId}/orders`, { params });
   },
   // 获取Consumer的订阅列表
   getConsumerSubscriptions: (
@@ -207,6 +233,10 @@ export const portalApi = {
       },
     });
   },
+  // 获取后台顶层订单详情
+  getOrderDetail: (orderId: string) => {
+    return api.get(`/orders/${orderId}`);
+  },
   // 获取Portal Dashboard URL
   getPortalDashboard: (portalId: string, type: string = 'Portal') => {
     return api.get(`/portals/${portalId}/dashboard`, { params: { type } });
@@ -222,6 +252,12 @@ export const portalApi = {
   // 获取portal列表
   getPortals: (params?: { page?: number; size?: number }) => {
     return api.get(`/portals`, { params });
+  },
+  markOrderPaid: (consumerId: string, orderId: string) => {
+    return api.patch(`/consumers/${consumerId}/orders/${orderId}/paid`);
+  },
+  markOrderPaidByAdmin: (orderId: string) => {
+    return api.patch(`/orders/${orderId}/paid`);
   },
   // 解绑域名
   unbindDomain: (portalId: string, domain: string) => {

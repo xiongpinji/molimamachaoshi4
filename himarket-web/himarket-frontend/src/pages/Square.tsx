@@ -18,7 +18,7 @@ import { SkillCard } from '../components/square/SkillCard';
 import { WorkerCard } from '../components/square/WorkerCard';
 import APIs, { type ICategory } from '../lib/apis';
 import { getIconString } from '../lib/iconUtils';
-import { getProductCardTags } from '../lib/utils/productCardTags';
+import { formatCommercePrice, getProductCardTags } from '../lib/utils/productCardTags';
 import { getSkillLatestAuthor, getWorkerLatestAuthor } from '../lib/utils/skillVersionInfo';
 
 import type { IProductDetail } from '../lib/apis/product';
@@ -288,6 +288,11 @@ function Square(props: { activeType: string }) {
         key={product.productId}
         name={product.name}
         onClick={() => handleViewDetail(product)}
+        priceTag={
+          product.type === 'AGENT_API'
+            ? formatCommercePrice(product.feature?.commerceConfig, t)
+            : undefined
+        }
         tags={getProductCardTags(product, t)}
         updatedAt={getUpdatedAtLabel(product)}
       />

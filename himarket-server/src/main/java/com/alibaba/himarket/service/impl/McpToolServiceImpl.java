@@ -25,15 +25,18 @@ import com.alibaba.himarket.core.security.ContextHolder;
 import com.alibaba.himarket.dto.result.consumer.CredentialContext;
 import com.alibaba.himarket.dto.result.mcp.McpConfigResult;
 import com.alibaba.himarket.dto.result.mcp.McpToolListResult;
+import com.alibaba.himarket.dto.result.product.ProductResult;
 import com.alibaba.himarket.entity.Consumer;
 import com.alibaba.himarket.entity.ConsumerCredential;
 import com.alibaba.himarket.repository.ConsumerCredentialRepository;
 import com.alibaba.himarket.repository.ConsumerRepository;
 import com.alibaba.himarket.repository.SubscriptionRepository;
 import com.alibaba.himarket.service.McpToolService;
+import com.alibaba.himarket.service.ProductService;
 import com.alibaba.himarket.service.hichat.manager.ToolManager;
 import com.alibaba.himarket.support.api.spec.OpenAPIToolsConfig;
 import com.alibaba.himarket.support.consumer.ApiKeyConfig;
+import com.alibaba.himarket.support.enums.SubscriptionStatus;
 import com.alibaba.himarket.support.mcp.OpenAPIToolsConfigConverter;
 import com.alibaba.himarket.utils.JsonUtil;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -56,23 +59,39 @@ public class McpToolServiceImpl implements McpToolService {
     private final ConsumerRepository consumerRepository;
     private final ConsumerCredentialRepository credentialRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final ProductService productService;
     private final ToolManager toolManager;
 
     @Override
     @Transactional
     public McpToolListResult listMcpTools(String productId, McpConfigResult mcpConfig) {
-        Consumer consumer = findPrimaryConsumer(contextHolder.getUser());
-        subscriptionRepository
-                .findByConsumerIdAndProductId(consumer.getConsumerId(), productId)
-                .orElseThrow(
-                        () ->
-                                new BusinessException(
-                                        ErrorCode.INVALID_REQUEST,
-                                        "API product is not subscribed, not allowed to list"
-                                                + " tools"));
+        ProductResult product = productService.getProduct(productId);
+        if (!Boolean.FALSE.equals(product.getSubscribable())) {
+            Consumer consumer = findPrimaryConsumer(contextHolder.getUser());
+            subscriptionRepository
+                    .findByConsumerIdAndProductId(consumer.getConsumerId(), productId)
+                    .filter(sub -> sub.getStatus() == SubscriptionStatus.APPROVED)
+                    .orElseThrow(
+                            () ->
+                                    new BusinessException(
+                                            ErrorCode.INVALID_REQUEST,
+                                            "API product is not subscribed or approved, not allowed"
+                                                    + " to list tools"));
 
-        CredentialContext credential = getDefaultCredential(consumer.getConsumerId());
-        List<McpSchema.Tool> tools = toolManager.fetchTools(mcpConfig, credential);
+            CredentialContext credential = getDefaultCredential(consumer.getConsumerId());
+            List<McpSchema.Tool> tools = toolManager.fetchTools(mcpConfig, credential);
+            if (tools == null) {
+                throw new BusinessException(
+                        ErrorCode.INTERNAL_ERROR, "Failed to initialize MCP client");
+            }
+
+            McpToolListResult result = new McpToolListResult();
+            result.setTools(tools);
+            return result;
+        }
+
+        List<McpSchema.Tool> tools =
+                toolManager.fetchTools(mcpConfig, CredentialContext.builder().build());
         if (tools == null) {
             throw new BusinessException(
                     ErrorCode.INTERNAL_ERROR, "Failed to initialize MCP client");

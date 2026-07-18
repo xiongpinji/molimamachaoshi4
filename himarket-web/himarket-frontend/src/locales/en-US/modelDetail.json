@@ -60,6 +60,7 @@
     },
     "loginCta": "Sign in to start chatting",
     "startCta": "Start chat",
+    "purchaseCta": "Purchase and start chat",
     "subscribeCta": "Subscribe and start chat"
   },
   "curl": {

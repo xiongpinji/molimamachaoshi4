@@ -431,31 +431,62 @@ public class ConsumerServiceImpl implements ConsumerService {
                     ErrorCode.NOT_FOUND, Resources.SUBSCRIPTION, subscriptionId);
         }
 
-        if (subscription.getStatus() != SubscriptionStatus.PENDING) {
+        if (subscription.getStatus() == SubscriptionStatus.APPROVED) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST, "Subscription already approved");
         }
 
-        // Get consumer and credential information
         Consumer consumer =
                 contextHolder.isDeveloper()
                         ? findDevConsumer(consumerId)
                         : findConsumer(consumerId);
         ConsumerCredential credential = findCredential(consumerId);
+        return approveSubscriptionInternal(consumer, credential, subscription);
+    }
 
-        // Obtain product reference
-        ProductRefResult productRef = productService.getProductRef(subscription.getProductId());
-        if (productRef == null) {
-            throw new BusinessException(
-                    ErrorCode.INTERNAL_ERROR, "API product is not associated with any API");
+    @Override
+    public SubscriptionResult activatePurchasedProduct(String consumerId, String productId) {
+        Consumer consumer =
+                contextHolder.isDeveloper()
+                        ? findDevConsumer(consumerId)
+                        : findConsumer(consumerId);
+        ConsumerCredential credential = findCredential(consumerId);
+        ProductSubscription subscription =
+                subscriptionRepository
+                        .findByConsumerIdAndProductId(consumerId, productId)
+                        .orElseGet(
+                                () ->
+                                        subscriptionRepository.save(
+                                                ProductSubscription.builder()
+                                                        .subscriptionId(
+                                                                IdGenerator.genSubscriptionId())
+                                                        .productId(productId)
+                                                        .consumerId(consumerId)
+                                                        .developerId(consumer.getDeveloperId())
+                                                        .portalId(consumer.getPortalId())
+                                                        .status(SubscriptionStatus.PENDING)
+                                                        .build()));
+        return approveSubscriptionInternal(consumer, credential, subscription);
+    }
+
+    private SubscriptionResult approveSubscriptionInternal(
+            Consumer consumer, ConsumerCredential credential, ProductSubscription subscription) {
+        if (subscription.getStatus() == SubscriptionStatus.APPROVED) {
+            return toSubscriptionResult(subscription);
         }
 
-        // Authorize consumer in the gateway
-        ConsumerAuthConfig consumerAuthConfig = authorizeConsumer(consumer, credential, productRef);
+        ProductRefResult productRef = productService.getProductRef(subscription.getProductId());
+        if (productRef != null && productRef.getSourceType() == SourceType.GATEWAY) {
+            ConsumerAuthConfig consumerAuthConfig =
+                    authorizeConsumer(consumer, credential, productRef);
+            subscription.setConsumerAuthConfig(consumerAuthConfig);
+        }
 
-        subscription.setConsumerAuthConfig(consumerAuthConfig);
         subscription.setStatus(SubscriptionStatus.APPROVED);
         subscriptionRepository.saveAndFlush(subscription);
+        return toSubscriptionResult(subscription);
+    }
 
+    private SubscriptionResult toSubscriptionResult(ProductSubscription subscription) {
         ProductResult product = productService.getProduct(subscription.getProductId());
         SubscriptionResult result = new SubscriptionResult().convertFrom(subscription);
         if (product != null) {

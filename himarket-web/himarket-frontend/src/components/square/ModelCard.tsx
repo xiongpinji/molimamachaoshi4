@@ -8,10 +8,19 @@ interface ModelCardProps {
   description: string;
   updatedAt: string;
   tags: string[];
+  priceTag?: string;
   onClick?: () => void;
 }
 
-export function ModelCard({ description, icon, name, onClick, tags, updatedAt }: ModelCardProps) {
+export function ModelCard({
+  description,
+  icon,
+  name,
+  onClick,
+  priceTag,
+  tags,
+  updatedAt,
+}: ModelCardProps) {
   return (
     <button
       className="
@@ -49,6 +58,11 @@ export function ModelCard({ description, icon, name, onClick, tags, updatedAt }:
       </div>
 
       <div className="mb-3 flex min-h-6 flex-wrap items-center gap-2">
+        {priceTag && (
+          <span className="inline-flex min-h-6 items-center rounded-[6px] border border-[#FFE2B8] bg-[#FFF7EA] px-2 text-xs font-semibold text-[#B25A00]">
+            {priceTag}
+          </span>
+        )}
         {tags.slice(0, 3).map((tag) => (
           <span
             className="inline-flex min-h-6 items-center rounded-[6px] border border-[#E4EAF3] bg-[#F8FAFD] px-2 text-xs font-semibold text-[#566176]"

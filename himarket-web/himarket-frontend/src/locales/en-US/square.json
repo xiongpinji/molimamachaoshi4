@@ -24,6 +24,8 @@
   "modelMarketTitle": "Model Market",
   "imageGeneration": "Image",
   "multiModal": "Multi-modal",
+  "oneTimePrice": "{{price}} one-time",
+  "periodicPrice": "{{price}} / period",
   "noDescription": "No description yet. Open the product detail page for usage examples and configuration.",
   "openAiCompatible": "OpenAI-compatible",
   "restEndpoint": "REST endpoint",

@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `product_order` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `order_id` varchar(64) NOT NULL,
+    `product_id` varchar(64) NOT NULL,
+    `consumer_id` varchar(64) NOT NULL,
+    `developer_id` varchar(64) NOT NULL,
+    `portal_id` varchar(64) NOT NULL,
+    `product_name` varchar(128) NOT NULL,
+    `amount` decimal(10,2) NOT NULL,
+    `currency` varchar(16) NOT NULL,
+    `pricing_mode` varchar(32) NOT NULL,
+    `status` varchar(32) NOT NULL,
+    `paid_at` datetime(3) DEFAULT NULL,
+    `created_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_order_id` (`order_id`),
+    KEY `idx_product_order_consumer` (`consumer_id`),
+    KEY `idx_product_order_product` (`product_id`),
+    KEY `idx_product_order_portal` (`portal_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

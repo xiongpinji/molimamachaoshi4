@@ -4,10 +4,11 @@ import {
   IdcardOutlined,
   MailOutlined,
   SafetyCertificateOutlined,
+  ShoppingOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Button, Skeleton, Typography, message } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Button, Input, Pagination, Select, Skeleton, Tag, Typography, message } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,8 +18,9 @@ import { notifyAuthInvalidated } from '../hooks/useAuth';
 import APIs, { type IDeveloperInfo } from '../lib/apis';
 import { clearCachedUserInfo } from '../lib/userInfoCache';
 import { formatDateTime } from '../lib/utils';
+import { getOrderStatusColor, getOrderStatusLabel } from '../lib/utils/orderStatus';
 
-type ProfileSection = 'identity' | 'profile' | 'security';
+type ProfileSection = 'identity' | 'orders' | 'profile' | 'security';
 
 const { Title } = Typography;
 
@@ -37,6 +39,22 @@ const Profile: React.FC = () => {
   const [developerInfo, setDeveloperInfo] = useState<IDeveloperInfo | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
+  const [primaryConsumerId, setPrimaryConsumerId] = useState<string | null>(null);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [orders, setOrders] = useState<
+    Array<{
+      orderId: string;
+      productName?: string;
+      amount: number;
+      currency: string;
+      status: string;
+    }>
+  >([]);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [ordersPageSize] = useState(10);
+  const [ordersTotal, setOrdersTotal] = useState(0);
+  const [orderSearchKeyword, setOrderSearchKeyword] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string | undefined>();
 
   useEffect(() => {
     APIs.getDeveloperInfo()
@@ -49,7 +67,35 @@ const Profile: React.FC = () => {
       .finally(() => {
         setProfileLoading(false);
       });
+
+    APIs.getPrimaryConsumer()
+      .then((response) => {
+        setPrimaryConsumerId(response.data?.consumerId || null);
+      })
+      .catch(() => {
+        setPrimaryConsumerId(null);
+      });
   }, []);
+
+  useEffect(() => {
+    if (activeSection !== 'orders' || !primaryConsumerId) {
+      return;
+    }
+
+    setOrdersLoading(true);
+    APIs.getProductOrders(primaryConsumerId, { page: ordersPage, size: ordersPageSize })
+      .then((response) => {
+        setOrders(response.data?.content || []);
+        setOrdersTotal(response.data?.totalElements || 0);
+      })
+      .catch(() => {
+        setOrders([]);
+        setOrdersTotal(0);
+      })
+      .finally(() => {
+        setOrdersLoading(false);
+      });
+  }, [activeSection, ordersPage, ordersPageSize, primaryConsumerId]);
 
   const handleChangePassword = async (values: { newPassword: string; oldPassword: string }) => {
     setChangePasswordLoading(true);
@@ -72,6 +118,7 @@ const Profile: React.FC = () => {
 
   const navItems = [
     { icon: <UserOutlined />, key: 'profile' as const, label: t('profileInfo') },
+    { icon: <ShoppingOutlined />, key: 'orders' as const, label: t('purchaseHistory') },
     { icon: <SafetyCertificateOutlined />, key: 'security' as const, label: t('accountSecurity') },
     {
       comingSoon: true,
@@ -99,6 +146,17 @@ const Profile: React.FC = () => {
     },
   ];
 
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const matchesKeyword =
+        !orderSearchKeyword ||
+        (order.productName || '').toLowerCase().includes(orderSearchKeyword.toLowerCase()) ||
+        order.orderId.toLowerCase().includes(orderSearchKeyword.toLowerCase());
+      const matchesStatus = !orderStatusFilter || order.status === orderStatusFilter;
+      return matchesKeyword && matchesStatus;
+    });
+  }, [orderSearchKeyword, orderStatusFilter, orders]);
+
   const renderProfileContent = () => (
     <>
       <div>
@@ -123,6 +181,90 @@ const Profile: React.FC = () => {
             </div>
           ))}
         </dl>
+      )}
+    </>
+  );
+
+  const renderOrdersContent = () => (
+    <>
+      <div>
+        <h1 className="m-0 text-xl font-semibold text-gray-950">{t('purchaseHistory')}</h1>
+        <p className="mt-2 text-sm leading-6 text-gray-500">{t('purchaseHistoryDescription')}</p>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-3 md:flex-row">
+        <Input
+          allowClear
+          className="md:w-80"
+          onChange={(e) => setOrderSearchKeyword(e.target.value)}
+          placeholder={t('orderSearchPlaceholder')}
+          value={orderSearchKeyword}
+        />
+        <Select
+          allowClear
+          className="md:w-56"
+          onChange={(value) => setOrderStatusFilter(value)}
+          placeholder={t('orderStatusFilterPlaceholder')}
+          value={orderStatusFilter}
+        >
+          <Select.Option value="PENDING_PAYMENT">
+            {t('orderStatusLabels.PENDING_PAYMENT')}
+          </Select.Option>
+          <Select.Option value="PAID">{t('orderStatusLabels.PAID')}</Select.Option>
+          <Select.Option value="FAILED">{t('orderStatusLabels.FAILED')}</Select.Option>
+          <Select.Option value="CANCELLED">{t('orderStatusLabels.CANCELLED')}</Select.Option>
+        </Select>
+      </div>
+
+      {ordersLoading ? (
+        <Skeleton active className="mt-6" paragraph={{ rows: 4 }} />
+      ) : filteredOrders.length > 0 ? (
+        <>
+          <div className="mt-6 space-y-3">
+            {filteredOrders.map((order) => (
+              <button
+                className="w-full rounded-[14px] border border-[#E3EAF4] bg-[#FBFCFF] px-4 py-3 text-left transition-colors hover:border-[#C8D5E6]"
+                key={order.orderId}
+                onClick={() => navigate(`/orders/${order.orderId}`)}
+                type="button"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-gray-900">
+                      {order.productName || order.orderId}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">{order.orderId}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-gray-900">
+                      {order.currency} {order.amount}
+                    </div>
+                    <div className="mt-1">
+                      <Tag color={getOrderStatusColor(order.status)}>
+                        {getOrderStatusLabel(order.status, t)}
+                      </Tag>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+          {ordersTotal > ordersPageSize && (
+            <div className="mt-6 flex justify-end">
+              <Pagination
+                current={ordersPage}
+                onChange={setOrdersPage}
+                pageSize={ordersPageSize}
+                showSizeChanger={false}
+                total={ordersTotal}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="mt-6 rounded-[16px] border border-dashed border-[#DDE5F0] bg-[#FBFCFF] px-6 py-10 text-center text-sm text-gray-500">
+          {t('noOrders')}
+        </div>
       )}
     </>
   );
@@ -156,6 +298,7 @@ const Profile: React.FC = () => {
   const renderActiveContent = () => {
     if (activeSection === 'security') return renderSecurityContent();
     if (activeSection === 'identity') return renderIdentityContent();
+    if (activeSection === 'orders') return renderOrdersContent();
     return renderProfileContent();
   };
 
