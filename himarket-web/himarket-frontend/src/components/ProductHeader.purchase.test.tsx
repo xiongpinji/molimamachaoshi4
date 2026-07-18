@@ -170,17 +170,15 @@ describe('ProductHeader purchase flow', () => {
       subscribedConsumers: [],
     });
     mocks.getPrimaryConsumer.mockResolvedValue({ data: { consumerId: 'consumer-a' } });
-    mocks.getActiveProductOrder
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({
-        orderId: 'order-b',
-        productId: 'product-a',
-        productName: 'Legal Assistant',
-        amount: 99.9,
-        currency: 'CNY',
-        pricingMode: 'ONE_TIME',
-        status: 'PENDING_PAYMENT',
-      });
+    mocks.getActiveProductOrder.mockResolvedValueOnce(null).mockResolvedValueOnce({
+      orderId: 'order-b',
+      productId: 'product-a',
+      productName: 'Legal Assistant',
+      amount: 99.9,
+      currency: 'CNY',
+      pricingMode: 'ONE_TIME',
+      status: 'PENDING_PAYMENT',
+    });
     mocks.createProductOrder.mockRejectedValue(new Error('duplicate active order'));
 
     render(

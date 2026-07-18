@@ -12,7 +12,15 @@ interface ModelCardProps {
   onClick?: () => void;
 }
 
-export function ModelCard({ description, icon, name, onClick, priceTag, tags, updatedAt }: ModelCardProps) {
+export function ModelCard({
+  description,
+  icon,
+  name,
+  onClick,
+  priceTag,
+  tags,
+  updatedAt,
+}: ModelCardProps) {
   return (
     <button
       className="

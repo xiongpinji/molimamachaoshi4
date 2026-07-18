@@ -288,7 +288,11 @@ function Square(props: { activeType: string }) {
         key={product.productId}
         name={product.name}
         onClick={() => handleViewDetail(product)}
-        priceTag={product.type === 'AGENT_API' ? formatCommercePrice(product.feature?.commerceConfig, t) : undefined}
+        priceTag={
+          product.type === 'AGENT_API'
+            ? formatCommercePrice(product.feature?.commerceConfig, t)
+            : undefined
+        }
         tags={getProductCardTags(product, t)}
         updatedAt={getUpdatedAtLabel(product)}
       />

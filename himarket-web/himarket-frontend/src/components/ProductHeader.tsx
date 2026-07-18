@@ -148,15 +148,20 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
 
     const shouldShowSubscribeButton = subscribable !== false;
     const priceText = formatCommercePrice(commerceConfig, t);
-    const pricingModeText =
-      commerceConfig?.pricingMode ? t(`commerce.pricingMode.${commerceConfig.pricingMode}`) : undefined;
+    const pricingModeText = commerceConfig?.pricingMode
+      ? t(`commerce.pricingMode.${commerceConfig.pricingMode}`)
+      : undefined;
     const commerceLabel = commerceConfig?.displayLabel || t('commerce.displayLabelFallback');
     const isPaid = Boolean(commerceConfig?.enabled && priceText);
     const hasApprovedSubscription = Boolean(
-      subscriptionStatus?.subscribedConsumers?.some((item) => item.subscription?.status === 'APPROVED'),
+      subscriptionStatus?.subscribedConsumers?.some(
+        (item) => item.subscription?.status === 'APPROVED',
+      ),
     );
     const hasPendingSubscription = Boolean(
-      subscriptionStatus?.subscribedConsumers?.some((item) => item.subscription?.status === 'PENDING'),
+      subscriptionStatus?.subscribedConsumers?.some(
+        (item) => item.subscription?.status === 'PENDING',
+      ),
     );
     const hasPendingPaymentOrder = activeOrder?.status === 'PENDING_PAYMENT';
     const hasPaidOrder = activeOrder?.status === 'PAID';
@@ -546,12 +551,18 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
                   <>
                     {hasApprovedSubscription ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-green-100 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-600">
-                        <CheckCircleFilled className="text-green-500" style={{ fontSize: '10px' }} />
+                        <CheckCircleFilled
+                          className="text-green-500"
+                          style={{ fontSize: '10px' }}
+                        />
                         {isPaid ? t('purchase.active') : t('subscribe.subscribed')}
                       </span>
                     ) : accessState === 'purchase_continue_payment' ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600">
-                        <ClockCircleFilled className="text-amber-500" style={{ fontSize: '10px' }} />
+                        <ClockCircleFilled
+                          className="text-amber-500"
+                          style={{ fontSize: '10px' }}
+                        />
                         {t('purchase.continuePayment')}
                       </span>
                     ) : accessState === 'purchase_activation_processing' ? (
@@ -607,7 +618,9 @@ export const ProductHeader = forwardRef<ProductHeaderHandle, ProductHeaderProps>
             {priceText && (
               <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[#F6D7A8] bg-[#FFF8EC] px-4 py-3">
                 <div>
-                  <div className="text-xs font-medium text-[#8A5A10]">{t('commerce.priceTitle')}</div>
+                  <div className="text-xs font-medium text-[#8A5A10]">
+                    {t('commerce.priceTitle')}
+                  </div>
                   <div className="mt-1 text-lg font-semibold text-[#8A4B08]">{priceText}</div>
                 </div>
                 <span className="inline-flex items-center rounded-full border border-[#F0C98A] bg-white/80 px-2.5 py-1 text-xs font-medium text-[#A25B00]">

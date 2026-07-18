@@ -208,7 +208,12 @@ export const portalApi = {
     return api.get(`/orders/${orderId}`);
   },
   // 获取后台顶层订单列表
-  getAllOrders: (params?: { page?: number; size?: number; status?: string; productName?: string }) => {
+  getAllOrders: (params?: {
+    page?: number;
+    size?: number;
+    status?: string;
+    productName?: string;
+  }) => {
     return api.get(`/orders`, { params });
   },
   // 获取Consumer的订单详情

@@ -41,13 +41,15 @@ const Profile: React.FC = () => {
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [primaryConsumerId, setPrimaryConsumerId] = useState<string | null>(null);
   const [ordersLoading, setOrdersLoading] = useState(false);
-  const [orders, setOrders] = useState<Array<{
-    orderId: string;
-    productName?: string;
-    amount: number;
-    currency: string;
-    status: string;
-  }>>([]);
+  const [orders, setOrders] = useState<
+    Array<{
+      orderId: string;
+      productName?: string;
+      amount: number;
+      currency: string;
+      status: string;
+    }>
+  >([]);
   const [ordersPage, setOrdersPage] = useState(1);
   const [ordersPageSize] = useState(10);
   const [ordersTotal, setOrdersTotal] = useState(0);
@@ -205,7 +207,9 @@ const Profile: React.FC = () => {
           placeholder={t('orderStatusFilterPlaceholder')}
           value={orderStatusFilter}
         >
-          <Select.Option value="PENDING_PAYMENT">{t('orderStatusLabels.PENDING_PAYMENT')}</Select.Option>
+          <Select.Option value="PENDING_PAYMENT">
+            {t('orderStatusLabels.PENDING_PAYMENT')}
+          </Select.Option>
           <Select.Option value="PAID">{t('orderStatusLabels.PAID')}</Select.Option>
           <Select.Option value="FAILED">{t('orderStatusLabels.FAILED')}</Select.Option>
           <Select.Option value="CANCELLED">{t('orderStatusLabels.CANCELLED')}</Select.Option>

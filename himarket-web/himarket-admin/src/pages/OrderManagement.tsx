@@ -7,10 +7,7 @@ export default function OrderManagement() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
-        description={t('page.orders.description')}
-        title={t('page.orders.title')}
-      />
+      <AdminPageHeader description={t('page.orders.description')} title={t('page.orders.title')} />
 
       <OrderListModal
         consumerId="admin-global"

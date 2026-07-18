@@ -125,7 +125,11 @@ function OrderDetailPage() {
     <Layout>
       <div className="w-full">
         <section className="min-h-[calc(100vh-96px)] rounded-2xl border border-white/40 bg-white/90 p-6 shadow-xs backdrop-blur-xl">
-          <button className="mb-4 inline-flex items-center gap-2 text-sm text-gray-600" onClick={() => navigate('/profile')} type="button">
+          <button
+            className="mb-4 inline-flex items-center gap-2 text-sm text-gray-600"
+            onClick={() => navigate('/profile')}
+            type="button"
+          >
             <ArrowLeftOutlined />
             {t('backToOrders')}
           </button>
@@ -141,7 +145,9 @@ function OrderDetailPage() {
 
               <Descriptions bordered column={1} size="middle">
                 <Descriptions.Item label={t('orderId')}>{order.orderId}</Descriptions.Item>
-                <Descriptions.Item label={t('orderProduct')}>{order.productName || '-'}</Descriptions.Item>
+                <Descriptions.Item label={t('orderProduct')}>
+                  {order.productName || '-'}
+                </Descriptions.Item>
                 <Descriptions.Item label={t('orderAmount')}>
                   {order.currency} {order.amount}
                 </Descriptions.Item>
@@ -150,21 +156,46 @@ function OrderDetailPage() {
                     {getOrderStatusLabel(order.status, t)}
                   </Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label={t('orderPricingMode')}>{order.pricingMode}</Descriptions.Item>
-                <Descriptions.Item label={t('orderPaidAt')}>{order.paidAt || '-'}</Descriptions.Item>
-                <Descriptions.Item label={t('orderCreatedAt')}>{order.createAt || '-'}</Descriptions.Item>
-                <Descriptions.Item label={t('orderConsumerId')}>{primaryConsumerId || '-'}</Descriptions.Item>
+                <Descriptions.Item label={t('orderPricingMode')}>
+                  {order.pricingMode}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('orderPaidAt')}>
+                  {order.paidAt || '-'}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('orderCreatedAt')}>
+                  {order.createAt || '-'}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('orderConsumerId')}>
+                  {primaryConsumerId || '-'}
+                </Descriptions.Item>
               </Descriptions>
 
               {order.paymentRecords && order.paymentRecords.length > 0 && (
-                <Descriptions bordered className="mt-4" column={1} size="small" title={t('paymentRecordsTitle')}>
+                <Descriptions
+                  bordered
+                  className="mt-4"
+                  column={1}
+                  size="small"
+                  title={t('paymentRecordsTitle')}
+                >
                   {order.paymentRecords.map((paymentRecord) => (
-                    <Descriptions.Item key={paymentRecord.paymentRecordId} label={paymentRecord.paymentRecordId}>
+                    <Descriptions.Item
+                      key={paymentRecord.paymentRecordId}
+                      label={paymentRecord.paymentRecordId}
+                    >
                       <div className="space-y-1 text-sm">
-                        <div>{t('paymentProvider')}: {paymentRecord.provider}</div>
-                        <div>{t('paymentStatus')}: {paymentRecord.status}</div>
-                        <div>{t('orderAmount')}: {paymentRecord.currency} {paymentRecord.amount}</div>
-                        <div>{t('paymentPayload')}: {paymentRecord.callbackPayload || '-'}</div>
+                        <div>
+                          {t('paymentProvider')}: {paymentRecord.provider}
+                        </div>
+                        <div>
+                          {t('paymentStatus')}: {paymentRecord.status}
+                        </div>
+                        <div>
+                          {t('orderAmount')}: {paymentRecord.currency} {paymentRecord.amount}
+                        </div>
+                        <div>
+                          {t('paymentPayload')}: {paymentRecord.callbackPayload || '-'}
+                        </div>
                       </div>
                     </Descriptions.Item>
                   ))}

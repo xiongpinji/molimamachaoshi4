@@ -45,7 +45,11 @@ export function OrderListModal({
     total: 0,
   });
 
-  const fetchOrders = (page = pagination.current, size = pagination.pageSize, productName?: string) => {
+  const fetchOrders = (
+    page = pagination.current,
+    size = pagination.pageSize,
+    productName?: string,
+  ) => {
     setLoading(true);
     const request = useTopLevelApi
       ? portalApi.getAllOrders({ page, productName, size })
@@ -154,7 +158,9 @@ export function OrderListModal({
     {
       dataIndex: 'createAt',
       key: 'createAt',
-      render: (date: string) => <span className="text-xs text-gray-500">{formatDateTime(date)}</span>,
+      render: (date: string) => (
+        <span className="text-xs text-gray-500">{formatDateTime(date)}</span>
+      ),
       title: t('portal.orders.time'),
     },
   ];
@@ -191,8 +197,12 @@ export function OrderListModal({
           {currentOrder && (
             <div className="space-y-4">
               <Descriptions bordered column={1} size="small">
-                <Descriptions.Item label={t('portal.orders.orderId')}>{currentOrder.orderId}</Descriptions.Item>
-                <Descriptions.Item label={t('portal.orders.productName')}>{currentOrder.productName}</Descriptions.Item>
+                <Descriptions.Item label={t('portal.orders.orderId')}>
+                  {currentOrder.orderId}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('portal.orders.productName')}>
+                  {currentOrder.productName}
+                </Descriptions.Item>
                 <Descriptions.Item label={t('portal.orders.amount')}>
                   {currentOrder.currency} {currentOrder.amount}
                 </Descriptions.Item>
@@ -208,14 +218,33 @@ export function OrderListModal({
               </Descriptions>
 
               {currentOrder.paymentRecords && currentOrder.paymentRecords.length > 0 && (
-                <Descriptions bordered className="mt-4" column={1} size="small" title={t('portal.orders.paymentRecordsTitle')}>
+                <Descriptions
+                  bordered
+                  className="mt-4"
+                  column={1}
+                  size="small"
+                  title={t('portal.orders.paymentRecordsTitle')}
+                >
                   {currentOrder.paymentRecords.map((paymentRecord) => (
-                    <Descriptions.Item key={paymentRecord.paymentRecordId} label={paymentRecord.paymentRecordId}>
+                    <Descriptions.Item
+                      key={paymentRecord.paymentRecordId}
+                      label={paymentRecord.paymentRecordId}
+                    >
                       <div className="space-y-1 text-sm">
-                        <div>{t('portal.orders.paymentProvider')}: {paymentRecord.provider}</div>
-                        <div>{t('portal.orders.paymentStatus')}: {paymentRecord.status}</div>
-                        <div>{t('portal.orders.amount')}: {paymentRecord.currency} {paymentRecord.amount}</div>
-                        <div>{t('portal.orders.paymentPayload')}: {paymentRecord.callbackPayload || '-'}</div>
+                        <div>
+                          {t('portal.orders.paymentProvider')}: {paymentRecord.provider}
+                        </div>
+                        <div>
+                          {t('portal.orders.paymentStatus')}: {paymentRecord.status}
+                        </div>
+                        <div>
+                          {t('portal.orders.amount')}: {paymentRecord.currency}{' '}
+                          {paymentRecord.amount}
+                        </div>
+                        <div>
+                          {t('portal.orders.paymentPayload')}:{' '}
+                          {paymentRecord.callbackPayload || '-'}
+                        </div>
                       </div>
                     </Descriptions.Item>
                   ))}
@@ -263,7 +292,8 @@ export function OrderListModal({
         loading={loading}
         pagination={{
           current: pagination.current,
-          onChange: (page, size) => fetchOrders(page, size ?? pagination.pageSize, productNameSearch || undefined),
+          onChange: (page, size) =>
+            fetchOrders(page, size ?? pagination.pageSize, productNameSearch || undefined),
           pageSize: pagination.pageSize,
           total: pagination.total,
         }}
@@ -285,8 +315,12 @@ export function OrderListModal({
         {currentOrder && (
           <div className="space-y-4">
             <Descriptions bordered column={1} size="small">
-              <Descriptions.Item label={t('portal.orders.orderId')}>{currentOrder.orderId}</Descriptions.Item>
-              <Descriptions.Item label={t('portal.orders.productName')}>{currentOrder.productName}</Descriptions.Item>
+              <Descriptions.Item label={t('portal.orders.orderId')}>
+                {currentOrder.orderId}
+              </Descriptions.Item>
+              <Descriptions.Item label={t('portal.orders.productName')}>
+                {currentOrder.productName}
+              </Descriptions.Item>
               <Descriptions.Item label={t('portal.orders.amount')}>
                 {currentOrder.currency} {currentOrder.amount}
               </Descriptions.Item>

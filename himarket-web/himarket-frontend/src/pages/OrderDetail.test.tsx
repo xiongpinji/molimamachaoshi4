@@ -121,8 +121,12 @@ describe('OrderDetailPage', () => {
       expect(screen.getByText('paymentRecordsTitle')).toBeInTheDocument();
     });
 
-    expect(screen.getByText((_, node) => node?.textContent === 'paymentPayload: manual-confirmation')).toBeInTheDocument();
-    expect(screen.getByText((_, node) => node?.textContent === 'paymentStatus: SUCCEEDED')).toBeInTheDocument();
+    expect(
+      screen.getByText((_, node) => node?.textContent === 'paymentPayload: manual-confirmation'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText((_, node) => node?.textContent === 'paymentStatus: SUCCEEDED'),
+    ).toBeInTheDocument();
   });
 
   it('待支付订单可在详情页确认支付并写入回调占位结果', async () => {

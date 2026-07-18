@@ -1,5 +1,17 @@
 import { CameraOutlined } from '@ant-design/icons';
-import { Modal, Form, Input, Select, Image, message, Switch, Radio, Space, Divider, InputNumber } from 'antd';
+import {
+  Modal,
+  Form,
+  Input,
+  Select,
+  Image,
+  message,
+  Switch,
+  Radio,
+  Space,
+  Divider,
+  InputNumber,
+} from 'antd';
 import { useState, useEffect } from 'react';
 
 import { useLocale } from '@/contexts/LocaleContext';
